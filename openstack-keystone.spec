@@ -1,14 +1,14 @@
 #
-# This is 2013.2 havana-1 milestone
+# This is 2013.2 havana-2 milestone
 #
 %global release_name havana
-%global milestone 1
+%global milestone 2
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.3.b%{milestone}%{?dist}
+Release:        0.4.b%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -23,9 +23,8 @@ Source5:        openstack-keystone-sample-data
 Patch0:       openstack-keystone-newdeps.patch
 
 #
-# patches_base=2013.2.b1
+# patches_base=2013.2.b2
 #
-Patch0001: 0001-Force-simple-Bind-for-authentication.patch
 
 BuildArch:      noarch
 
@@ -100,7 +99,6 @@ This package contains documentation for Keystone.
 %setup -q -n keystone-%{version}.b%{milestone}
 %patch0 -p1 -b .newdeps
 
-%patch0001 -p1
 sed -i 's/%{version}.b%{milestone}/%{version}/' PKG-INFO
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
@@ -241,6 +239,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 18 2013 pbrady@redhat.com 2013.2-0.4.b2
+- havana-2 milestone
+
 * Mon Jun 24 2013 apevec@redhat.com 2013.2-0.3.b1
 - restrict /var/log/keystone/ rhbz#956814
 
