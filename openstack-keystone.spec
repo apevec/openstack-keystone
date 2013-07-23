@@ -8,7 +8,7 @@
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.4.b%{milestone}%{?dist}
+Release:        0.5.b%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -239,6 +239,9 @@ fi
 %endif
 
 %changelog
+* Tue Jul 23 2013 pbrady@redhat.com 2013.2-0.5.b2
+- Ensure service start waits until service is available
+
 * Thu Jul 18 2013 pbrady@redhat.com 2013.2-0.4.b2
 - havana-2 milestone
 
