@@ -1,26 +1,37 @@
-diff -Naur keystone-2013.2.b2.orig/bin/keystone-all keystone-2013.2.b2/bin/keystone-all
---- keystone-2013.2.b2.orig/bin/keystone-all	2013-07-18 19:01:20.000000000 +0000
-+++ keystone-2013.2.b2/bin/keystone-all	2013-07-22 00:31:19.289679079 +0000
-@@ -17,7 +17,6 @@
+From 87fdcc5f0e53b6dcdcfc8dc0b10a3ebe662c9c35 Mon Sep 17 00:00:00 2001
+From: Alan Pevec <apevec@redhat.com>
+Date: Mon, 9 Sep 2013 18:58:47 +0200
+Subject: [PATCH] Use updated parallel install versions of epel package
+
+Use SQLAlchemy >= 0.7.8 WebOb >= 1.2 Routes >= 1.12.3 PasteDeploy >= 1.5.0
+and depend on the parallel installable
+versions of these packages to satisfy those requirements.
+---
+ bin/keystone-all     |  4 ++--
+ keystone/__init__.py | 29 +++++++++++++++++++++++++++++
+ 2 files changed, 31 insertions(+), 2 deletions(-)
+
+diff --git a/bin/keystone-all b/bin/keystone-all
+index 02294d2..8f1fe89 100755
+--- a/bin/keystone-all
++++ b/bin/keystone-all
+@@ -31,10 +31,10 @@ if os.path.exists(os.path.join(possible_topdir,
      sys.path.insert(0, possible_topdir)
  
  
 -from paste import deploy
- import pbr.version
- 
- from keystone.common import environment
-@@ -26,6 +25,8 @@
+-
  from keystone.openstack.common import gettextutils
- from keystone.openstack.common import importutils
  
 +from paste import deploy
 +
- 
- CONF = config.CONF
- 
-diff -Naur keystone-2013.2.b2.orig/keystone/__init__.py keystone-2013.2.b2/keystone/__init__.py
---- keystone-2013.2.b2.orig/keystone/__init__.py	2013-07-22 00:29:30.734905980 +0000
-+++ keystone-2013.2.b2/keystone/__init__.py	2013-07-22 00:32:08.954490625 +0000
+ # NOTE(blk-u):
+ # gettextutils.install() must run to set _ before importing any modules that
+ # contain static translated strings.
+diff --git a/keystone/__init__.py b/keystone/__init__.py
+index e69de29..6af9f66 100644
+--- a/keystone/__init__.py
++++ b/keystone/__init__.py
 @@ -0,0 +1,29 @@
 +import sys
 +import pkg_resources
@@ -41,8 +52,8 @@ diff -Naur keystone-2013.2.b2.orig/keystone/__init__.py keystone-2013.2.b2/keyst
 +            # and the associated pkg_resources.working_set.entries
 +            return pkg_resources.require(requirement)
 +
-+replace_dist("WebOb >= 1.0")
-+replace_dist("SQLAlchemy >= 0.6.3")
++replace_dist("WebOb >= 1.2")
++replace_dist("SQLAlchemy >= 0.7.8")
 +replace_dist("Routes >= 1.12.3")
 +
 +replace_dist("PasteDeploy >= 1.5.0")

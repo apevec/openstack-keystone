@@ -21,7 +21,6 @@ Source3:        openstack-keystone.upstart
 Source5:        openstack-keystone-sample-data
 Source20:       keystone-dist.conf
 
-Patch0:       openstack-keystone-newdeps.patch
 
 #
 # patches_base=2013.2.b3
@@ -29,6 +28,7 @@ Patch0:       openstack-keystone-newdeps.patch
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-Revert-Use-oslo.sphinx-and-remove-local-copy-of-doc-.patch
 Patch0003: 0003-sync-parameter-values-with-keystone-dist.conf.patch
+Patch0004: 0004-Use-updated-parallel-install-versions-of-epel-packag.patch
 
 BuildArch:      noarch
 
@@ -103,11 +103,11 @@ This package contains documentation for Keystone.
 
 %prep
 %setup -q -n keystone-%{version}.b%{milestone}
-%patch0 -p1 -b .newdeps
 
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
+%patch0004 -p1
 sed -i 's/%{version}.b%{milestone}/%{version}/' PKG-INFO
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
