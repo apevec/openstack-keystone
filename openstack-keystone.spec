@@ -1,14 +1,14 @@
 #
-# This is 2013.2 havana-2 milestone
+# This is 2013.2 havana-3 milestone
 #
 %global release_name havana
-%global milestone 2
+%global milestone 3
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.5.b%{milestone}%{?dist}
+Release:        0.8.b%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -19,18 +19,21 @@ Source1:        openstack-keystone.logrotate
 Source2:        openstack-keystone.init
 Source3:        openstack-keystone.upstart
 Source5:        openstack-keystone-sample-data
+Source20:       keystone-dist.conf
 
 Patch0:       openstack-keystone-newdeps.patch
 
 #
-# patches_base=2013.2.b2
+# patches_base=2013.2.b3
 #
+Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
+Patch0002: 0002-Revert-Use-oslo.sphinx-and-remove-local-copy-of-doc-.patch
+Patch0003: 0003-sync-parameter-values-with-keystone-dist.conf.patch
 
 BuildArch:      noarch
 
 BuildRequires:  python2-devel
 BuildRequires:  python-sphinx10
-BuildRequires:  openstack-utils
 BuildRequires:  python-pbr
 BuildRequires:  python-d2to1
 # These are required to build due to the requirements check added
@@ -40,7 +43,7 @@ BuildRequires:  python-paste-deploy1.5
 BuildRequires:  python-routes1.12
 
 Requires:       python-keystone = %{version}-%{release}
-Requires:       python-keystoneclient >= 1:0.2.0
+Requires:       python-keystoneclient >= 1:0.3.0
 
 Requires(post):   chkconfig
 Requires(postun): initscripts
@@ -72,10 +75,13 @@ Requires:       python-setuptools
 Requires:       MySQL-python
 Requires:       PyPAM
 Requires:       python-iso8601
-Requires:       python-oslo-config
+Requires:       python-oslo-config >= 1:1.2.0
 Requires:       openssl
-Requires:       python-pbr
-Requires:       python-d2to1
+Requires:       python-netaddr
+Requires:       python-six
+Requires:       python-babel >= 0.9.6
+Requires:       python-oauth2
+Requires:       python-dogpile-cache >= 0.5.0
 
 %description -n   python-keystone
 Keystone is a Python implementation of the OpenStack
@@ -99,6 +105,9 @@ This package contains documentation for Keystone.
 %setup -q -n keystone-%{version}.b%{milestone}
 %patch0 -p1 -b .newdeps
 
+%patch0001 -p1
+%patch0002 -p1
+%patch0003 -p1
 sed -i 's/%{version}.b%{milestone}/%{version}/' PKG-INFO
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
@@ -108,20 +117,12 @@ rm -rf keystone.egg-info
 # let RPM handle deps
 sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
 
+sed -i s/REDHATKEYSTONEVERSION/%{version}/ bin/keystone-all keystone/cli.py
 
 
 %build
-# change default configuration
 cp etc/keystone.conf.sample etc/keystone.conf
-openstack-config --set etc/keystone.conf DEFAULT log_file %{_localstatedir}/log/keystone/keystone.log
-openstack-config --set etc/keystone.conf sql connection mysql://keystone:keystone@localhost/keystone
-openstack-config --set etc/keystone.conf catalog template_file %{_sysconfdir}/keystone/default_catalog.templates
-openstack-config --set etc/keystone.conf catalog driver keystone.catalog.backends.sql.Catalog
-openstack-config --set etc/keystone.conf identity driver keystone.identity.backends.sql.Identity
-openstack-config --set etc/keystone.conf token driver keystone.token.backends.sql.Token
-openstack-config --set etc/keystone.conf ec2 driver keystone.contrib.ec2.backends.sql.Ec2
-# don't try systemd notification on el6
-#openstack-config --set etc/keystone.conf DEFAULT onready keystone.common.systemd
+# distribution defaults are located in keystone-dist.conf
 
 %{__python} setup.py build
 
@@ -134,15 +135,16 @@ rm -fr %{buildroot}%{python_sitelib}/run_tests.*
 
 install -d -m 755 %{buildroot}%{_sysconfdir}/keystone
 install -p -D -m 640 etc/keystone.conf %{buildroot}%{_sysconfdir}/keystone/keystone.conf
-install -p -D -m 640 etc/keystone-paste.ini %{buildroot}%{_sysconfdir}/keystone/keystone-paste.ini
+install -p -D -m 640 etc/keystone-paste.ini %{buildroot}%{_datadir}/keystone/keystone-dist-paste.ini
+install -p -D -m 640 %{SOURCE20} %{buildroot}%{_datadir}/keystone/keystone-dist.conf
 install -p -D -m 640 etc/logging.conf.sample %{buildroot}%{_sysconfdir}/keystone/logging.conf
 install -p -D -m 640 etc/default_catalog.templates %{buildroot}%{_sysconfdir}/keystone/default_catalog.templates
 install -p -D -m 640 etc/policy.json %{buildroot}%{_sysconfdir}/keystone/policy.json
 install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/openstack-keystone
 install -p -D -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/openstack-keystone
 # Install sample data script.
-install -p -D -m 755 tools/sample_data.sh %{buildroot}%{_datadir}/%{name}/sample_data.sh
-install -p -D -m 644 %{SOURCE3} %{buildroot}%{_datadir}/%{name}/%{name}.upstart
+install -p -D -m 755 tools/sample_data.sh %{buildroot}%{_datadir}/keystone/sample_data.sh
+install -p -D -m 644 %{SOURCE3} %{buildroot}%{_datadir}/keystone/%{name}.upstart
 install -p -D -m 755 %{SOURCE5} %{buildroot}%{_bindir}/openstack-keystone-sample-data
 
 install -d -m 755 %{buildroot}%{_sharedstatedir}/keystone
@@ -213,11 +215,13 @@ fi
 %{_bindir}/keystone-all
 %{_bindir}/keystone-manage
 %{_bindir}/openstack-keystone-sample-data
-%{_datadir}/%{name}
+%dir %{_datadir}/keystone
+%attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist.conf
+%attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist-paste.ini
+%attr(0755, root, root) %{_datadir}/keystone/sample_data.sh
 %{_initrddir}/openstack-keystone
 %dir %attr(0750, root, keystone) %{_sysconfdir}/keystone
 %config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/keystone.conf
-%config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/keystone-paste.ini
 %config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/logging.conf
 %config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/default_catalog.templates
 %config(noreplace) %attr(-, keystone, keystone) %{_sysconfdir}/keystone/policy.json
@@ -239,6 +243,11 @@ fi
 %endif
 
 %changelog
+* Mon Sep 09 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.8.b3
+- havana-3 milestone
+- drop pbr run-time dependency
+- set distribution defaults in keystone-dist.conf
+
 * Tue Jul 23 2013 pbrady@redhat.com 2013.2-0.5.b2
 - Ensure service start waits until service is available
 
