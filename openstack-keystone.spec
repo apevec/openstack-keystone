@@ -219,6 +219,7 @@ fi
 %attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist.conf
 %attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist-paste.ini
 %attr(0755, root, root) %{_datadir}/keystone/sample_data.sh
+%{_datadir}/keystone/%{name}.upstart
 %{_initrddir}/openstack-keystone
 %dir %attr(0750, root, keystone) %{_sysconfdir}/keystone
 %config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/keystone.conf
@@ -227,7 +228,6 @@ fi
 %config(noreplace) %attr(-, keystone, keystone) %{_sysconfdir}/keystone/policy.json
 %config(noreplace) %{_sysconfdir}/logrotate.d/openstack-keystone
 %dir %attr(-, keystone, keystone) %{_sharedstatedir}/keystone
-%dir %attr(-, keystone, keystone) %{_localstatedir}/log/keystone
 %dir %attr(0750, keystone, keystone) %{_localstatedir}/log/keystone
 %dir %attr(-, keystone, keystone) %{_localstatedir}/run/keystone
 
