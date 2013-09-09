@@ -8,7 +8,7 @@
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.9.b%{milestone}%{?dist}
+Release:        0.10.b%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -79,7 +79,7 @@ Requires:       python-oslo-config >= 1:1.2.0
 Requires:       openssl
 Requires:       python-netaddr
 Requires:       python-six
-Requires:       python-babel >= 0.9.6
+Requires:       python-babel >= 0.9.4
 Requires:       python-oauth2
 Requires:       python-dogpile-cache >= 0.5.0
 
@@ -243,7 +243,7 @@ fi
 %endif
 
 %changelog
-* Mon Sep 09 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.9.b3
+* Mon Sep 09 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.10.b3
 - havana-3 milestone
 - drop pbr run-time dependency
 - set distribution defaults in keystone-dist.conf
