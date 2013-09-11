@@ -8,7 +8,7 @@
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.10.b%{milestone}%{?dist}
+Release:        0.11.b%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -38,7 +38,7 @@ BuildRequires:  python-pbr
 BuildRequires:  python-d2to1
 # These are required to build due to the requirements check added
 BuildRequires:  python-sqlalchemy0.7
-BuildRequires:  python-webob1.0
+BuildRequires:  python-webob1.2
 BuildRequires:  python-paste-deploy1.5
 BuildRequires:  python-routes1.12
 
@@ -69,7 +69,7 @@ Requires:       python-migrate
 Requires:       python-paste-deploy1.5
 Requires:       python-routes1.12
 Requires:       python-sqlalchemy0.7
-Requires:       python-webob1.0
+Requires:       python-webob1.2
 Requires:       python-passlib
 Requires:       python-setuptools
 Requires:       MySQL-python
@@ -243,6 +243,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 11 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.11.b3
+- require webob1.2 rhbz#1006768
+
 * Mon Sep 09 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.10.b3
 - havana-3 milestone
 - drop pbr run-time dependency
