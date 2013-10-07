@@ -1,20 +1,20 @@
 #
-# This is 2013.2 havana-3 milestone
+# This is 2013.2 RC1
 #
 %global release_name havana
-%global milestone 3
+%global milestone rc1
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
 Version:        2013.2
-Release:        0.11.b%{milestone}%{?dist}
+Release:        0.14.%{milestone}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
 URL:            http://keystone.openstack.org/
 #Source0:        http://launchpad.net/keystone/%{release_name}/%{version}/+download/keystone-%{version}.tar.gz
-Source0:        http://launchpad.net/keystone/%{release_name}/%{release_name}-%{milestone}/+download/keystone-%{version}.b%{milestone}.tar.gz
+Source0:        http://launchpad.net/keystone/%{release_name}/%{release_name}-%{milestone}/+download/keystone-%{version}.%{milestone}.tar.gz
 Source1:        openstack-keystone.logrotate
 Source2:        openstack-keystone.init
 Source3:        openstack-keystone.upstart
@@ -23,12 +23,13 @@ Source20:       keystone-dist.conf
 
 
 #
-# patches_base=2013.2.b3
+# patches_base=2013.2.rc1
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-Revert-Use-oslo.sphinx-and-remove-local-copy-of-doc-.patch
 Patch0003: 0003-sync-parameter-values-with-keystone-dist.conf.patch
-Patch0004: 0004-Use-updated-parallel-install-versions-of-epel-packag.patch
+Patch0004: 0004-rename-httpd-keystone.py-to-httpd-keystone.wsgi.patch
+Patch0005: 0005-Use-updated-parallel-install-versions-of-epel-packag.patch
 
 BuildArch:      noarch
 
@@ -102,13 +103,14 @@ This package contains documentation for Keystone.
 %endif
 
 %prep
-%setup -q -n keystone-%{version}.b%{milestone}
+%setup -q -n keystone-%{version}.%{milestone}
 
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
 %patch0004 -p1
-sed -i 's/%{version}.b%{milestone}/%{version}/' PKG-INFO
+%patch0005 -p1
+sed -i 's/%{version}.%{milestone}/%{version}/' PKG-INFO
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
 find keystone -name \*.py -exec sed -i '/\/usr\/bin\/env python/d' {} \;
@@ -135,8 +137,8 @@ rm -fr %{buildroot}%{python_sitelib}/run_tests.*
 
 install -d -m 755 %{buildroot}%{_sysconfdir}/keystone
 install -p -D -m 640 etc/keystone.conf %{buildroot}%{_sysconfdir}/keystone/keystone.conf
-install -p -D -m 640 etc/keystone-paste.ini %{buildroot}%{_datadir}/keystone/keystone-dist-paste.ini
-install -p -D -m 640 %{SOURCE20} %{buildroot}%{_datadir}/keystone/keystone-dist.conf
+install -p -D -m 644 etc/keystone-paste.ini %{buildroot}%{_datadir}/keystone/keystone-dist-paste.ini
+install -p -D -m 644 %{SOURCE20} %{buildroot}%{_datadir}/keystone/keystone-dist.conf
 install -p -D -m 640 etc/logging.conf.sample %{buildroot}%{_sysconfdir}/keystone/logging.conf
 install -p -D -m 640 etc/default_catalog.templates %{buildroot}%{_sysconfdir}/keystone/default_catalog.templates
 install -p -D -m 640 etc/policy.json %{buildroot}%{_sysconfdir}/keystone/policy.json
@@ -146,6 +148,9 @@ install -p -D -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/openstack-keystone
 install -p -D -m 755 tools/sample_data.sh %{buildroot}%{_datadir}/keystone/sample_data.sh
 install -p -D -m 644 %{SOURCE3} %{buildroot}%{_datadir}/keystone/%{name}.upstart
 install -p -D -m 755 %{SOURCE5} %{buildroot}%{_bindir}/openstack-keystone-sample-data
+# Install sample HTTPD integration files
+install -p -D -m 644 httpd/keystone.wsgi  %{buildroot}%{_datadir}/keystone/
+install -p -D -m 644 httpd/wsgi-keystone.conf  %{buildroot}%{_datadir}/keystone/
 
 install -d -m 755 %{buildroot}%{_sharedstatedir}/keystone
 install -d -m 755 %{buildroot}%{_localstatedir}/log/keystone
@@ -216,16 +221,18 @@ fi
 %{_bindir}/keystone-manage
 %{_bindir}/openstack-keystone-sample-data
 %dir %{_datadir}/keystone
-%attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist.conf
-%attr(0640, root, keystone) %{_datadir}/keystone/keystone-dist-paste.ini
+%attr(0644, root, keystone) %{_datadir}/keystone/keystone-dist.conf
+%attr(0644, root, keystone) %{_datadir}/keystone/keystone-dist-paste.ini
 %attr(0755, root, root) %{_datadir}/keystone/sample_data.sh
 %{_datadir}/keystone/%{name}.upstart
 %{_initrddir}/openstack-keystone
+%attr(0644, root, keystone) %{_datadir}/keystone/keystone.wsgi
+%attr(0644, root, keystone) %{_datadir}/keystone/wsgi-keystone.conf
 %dir %attr(0750, root, keystone) %{_sysconfdir}/keystone
-%config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/keystone.conf
-%config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/logging.conf
-%config(noreplace) %attr(-, root, keystone) %{_sysconfdir}/keystone/default_catalog.templates
-%config(noreplace) %attr(-, keystone, keystone) %{_sysconfdir}/keystone/policy.json
+%config(noreplace) %attr(0640, root, keystone) %{_sysconfdir}/keystone/keystone.conf
+%config(noreplace) %attr(0640, root, keystone) %{_sysconfdir}/keystone/logging.conf
+%config(noreplace) %attr(0640, root, keystone) %{_sysconfdir}/keystone/default_catalog.templates
+%config(noreplace) %attr(0640, keystone, keystone) %{_sysconfdir}/keystone/policy.json
 %config(noreplace) %{_sysconfdir}/logrotate.d/openstack-keystone
 %dir %attr(-, keystone, keystone) %{_sharedstatedir}/keystone
 %dir %attr(0750, keystone, keystone) %{_localstatedir}/log/keystone
@@ -243,6 +250,11 @@ fi
 %endif
 
 %changelog
+* Mon Oct 07 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.14.rc1
+- rename HTTPD integration to keystone.wsgi
+- HTTPD integration files
+- Havana release candidate
+
 * Wed Sep 11 2013 Alan Pevec <apevec@redhat.com> - 2013.2-0.11.b3
 - require webob1.2 rhbz#1006768
 
