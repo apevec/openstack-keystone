@@ -24,10 +24,8 @@ Source20:       keystone-dist.conf
 # patches_base=2013.2
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
-Patch0002: 0002-Revert-Use-oslo.sphinx-and-remove-local-copy-of-doc-.patch
-Patch0003: 0003-sync-parameter-values-with-keystone-dist.conf.patch
-Patch0004: 0004-rename-httpd-keystone.py-to-httpd-keystone.wsgi.patch
-Patch0005: 0005-Use-updated-parallel-install-versions-of-epel-packag.patch
+Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
+Patch0003: 0003-Use-updated-parallel-install-versions-of-epel-packag.patch
 
 BuildArch:      noarch
 
@@ -107,8 +105,6 @@ This package contains documentation for Keystone.
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
-%patch0004 -p1
-%patch0005 -p1
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
 find keystone -name \*.py -exec sed -i '/\/usr\/bin\/env python/d' {} \;

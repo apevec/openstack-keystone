@@ -1,4 +1,4 @@
-From d74f55101e1db3577032bbd722e7891b6533b931 Mon Sep 17 00:00:00 2001
+From 835e45f1d94844adb3795d350e5cf2b71dd8de9b Mon Sep 17 00:00:00 2001
 From: Alan Pevec <apevec@redhat.com>
 Date: Mon, 9 Sep 2013 18:58:47 +0200
 Subject: [PATCH] Use updated parallel install versions of epel package
@@ -12,7 +12,7 @@ versions of these packages to satisfy those requirements.
  2 files changed, 31 insertions(+), 2 deletions(-)
 
 diff --git a/bin/keystone-all b/bin/keystone-all
-index 02294d2..8f1fe89 100755
+index 1e6aecb..b08ac0a 100755
 --- a/bin/keystone-all
 +++ b/bin/keystone-all
 @@ -31,10 +31,10 @@ if os.path.exists(os.path.join(possible_topdir,
