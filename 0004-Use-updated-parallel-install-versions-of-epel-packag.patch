@@ -1,4 +1,4 @@
-From 835e45f1d94844adb3795d350e5cf2b71dd8de9b Mon Sep 17 00:00:00 2001
+From 13a39cfb9a06c814aacc24fa4b10946804c07f1c Mon Sep 17 00:00:00 2001
 From: Alan Pevec <apevec@redhat.com>
 Date: Mon, 9 Sep 2013 18:58:47 +0200
 Subject: [PATCH] Use updated parallel install versions of epel package

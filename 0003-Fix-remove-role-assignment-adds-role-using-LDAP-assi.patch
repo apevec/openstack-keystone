@@ -1,4 +1,4 @@
-From 1d50ffd4ccb9c4db0b17f910c8c4724135f3119b Mon Sep 17 00:00:00 2001
+From 0bfe61097bb86f3103a720842577617aa37e8c4e Mon Sep 17 00:00:00 2001
 From: Brant Knudson <bknudson@us.ibm.com>
 Date: Mon, 21 Oct 2013 15:21:12 -0500
 Subject: [PATCH] Fix remove role assignment adds role using LDAP assignment
