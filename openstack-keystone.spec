@@ -1,13 +1,13 @@
 #
-# This is 2013.2 Havana release
+# This is 2013.2.1 Havana stable release
 #
 %global release_name havana
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
-Version:        2013.2
-Release:        2%{?dist}
+Version:        2013.2.1
+Release:        1%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -20,11 +20,10 @@ Source20:       keystone-dist.conf
 
 
 #
-# patches_base=2013.2
+# patches_base=2013.2.1
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
-Patch0003: 0003-Fix-remove-role-assignment-adds-role-using-LDAP-assi.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -96,7 +95,6 @@ This package contains documentation for Keystone.
 
 %patch0001 -p1
 %patch0002 -p1
-%patch0003 -p1
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
 find keystone -name \*.py -exec sed -i '/\/usr\/bin\/env python/d' {} \;
@@ -218,6 +216,9 @@ fi
 %endif
 
 %changelog
+* Tue Dec 17 2013 Alan Pevec <apevec@redhat.com> 2013.2.1-1
+- updated to stable havana 2013.2.1 release CVE-2013-6391
+
 * Wed Oct 30 2013 Alan Pevec <apevec@redhat.com> 2013.2-2
 - unintentional role granting with Keystone LDAP backend CVE-2013-4477
 
