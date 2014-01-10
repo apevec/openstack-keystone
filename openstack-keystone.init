@@ -15,39 +15,22 @@ exec="/usr/bin/$prog-all"
 config="/etc/$prog/$prog.conf"
 distconfig="/usr/share/$prog/$prog-dist.conf"
 pidfile="/var/run/$prog/$prog.pid"
+startuplog="/var/log/$prog/$prog-startup.log"
+timeout=60
+wrapper="/usr/share/$prog/daemon_notify.sh"
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
 lockfile=/var/lock/subsys/$prog
 
-keystone_available()
-{
-    keystone discover 2>&1 | grep -qFi "Keystone found"
-}
-
-# Wait at most 10s for the service to become available
-wait_until_keystone_available()
-{
-    tries=0
-    until keystone_available; do
-        rh_status_q || return 1
-        tries=$(($tries + 1))
-        [ $tries -eq 20 ] && { echo 'Aborting wait for keystone to start' >&2; return 1; }
-        sleep .5
-    done
-
-    return 0;
-}
-
 start() {
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
-    daemon --user keystone --pidfile $pidfile "$exec --config-file $distconfig --config-file $config &>/dev/null & echo \$! > $pidfile"
+    daemon --user keystone --pidfile $pidfile "$wrapper $exec $pidfile $startuplog $timeout"
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile
-    [ $retval -eq 0 ] && wait_until_keystone_available
     return $retval
 }
 

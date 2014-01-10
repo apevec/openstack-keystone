@@ -7,7 +7,7 @@
 
 Name:           openstack-keystone
 Version:        2013.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -18,6 +18,7 @@ Source2:        openstack-keystone.init
 Source3:        openstack-keystone.upstart
 Source5:        openstack-keystone-sample-data
 Source20:       keystone-dist.conf
+Source21:       daemon_notify.sh
 
 
 #
@@ -26,6 +27,7 @@ Source20:       keystone-dist.conf
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
 Patch0003: 0003-Use-updated-parallel-install-versions-of-epel-packag.patch
+Patch0004: 0004-improve-systemd-onready-notification.patch
 
 BuildArch:      noarch
 
@@ -48,6 +50,10 @@ Requires(postun): initscripts
 Requires(preun):  chkconfig
 Requires(preun):  initscripts
 Requires(pre):    shadow-utils
+
+# for daemon_notify
+Requires: /usr/bin/uuidgen
+Requires: /bin/sleep
 
 %description
 Keystone is a Python implementation of the OpenStack
@@ -105,6 +111,7 @@ This package contains documentation for Keystone.
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
+%patch0004 -p1
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
 find keystone -name \*.py -exec sed -i '/\/usr\/bin\/env python/d' {} \;
@@ -139,6 +146,9 @@ install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/openstack
 install -p -D -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/openstack-keystone
 # Install sample data script.
 install -p -D -m 755 tools/sample_data.sh %{buildroot}%{_datadir}/keystone/sample_data.sh
+# TEMP until best place for this figured out: service readiness wrapper
+install -p -D -m 755 %{SOURCE21} %{buildroot}%{_datadir}/keystone/daemon_notify.sh
+# TEMP END
 install -p -D -m 644 %{SOURCE3} %{buildroot}%{_datadir}/keystone/%{name}.upstart
 install -p -D -m 755 %{SOURCE5} %{buildroot}%{_bindir}/openstack-keystone-sample-data
 # Install sample HTTPD integration files
@@ -217,6 +227,7 @@ fi
 %attr(0644, root, keystone) %{_datadir}/keystone/keystone-dist.conf
 %attr(0644, root, keystone) %{_datadir}/keystone/keystone-dist-paste.ini
 %attr(0755, root, root) %{_datadir}/keystone/sample_data.sh
+%attr(0755, root, root) %{_datadir}/keystone/daemon_notify.sh
 %{_datadir}/keystone/%{name}.upstart
 %{_initrddir}/openstack-keystone
 %attr(0644, root, keystone) %{_datadir}/keystone/keystone.wsgi
@@ -243,6 +254,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 10 2014 Alan Pevec <apevec@redhat.com> 2013.2.1-2
+- use service readiness notification in initscript rhbz#1036515
+
 * Tue Dec 17 2013 Alan Pevec <apevec@redhat.com> 2013.2.1-1
 - updated to stable havana 2013.2.1 release CVE-2013-6391
 
