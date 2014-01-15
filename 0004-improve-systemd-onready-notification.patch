@@ -1,4 +1,4 @@
-From c61067af8a31bc72d71ef1eb94d24316b19cbd86 Mon Sep 17 00:00:00 2001
+From 7c0bc415553c635ae4c0f0edeeca0ab76cd4f4d3 Mon Sep 17 00:00:00 2001
 From: Alan Pevec <apevec@redhat.com>
 Date: Wed, 8 Jan 2014 18:52:09 +0100
 Subject: [PATCH] improve systemd onready notification
@@ -19,7 +19,7 @@ Change-Id: I837ca8fed04780224d4cadcb535728b1b1d2adc5
  1 file changed, 52 insertions(+), 11 deletions(-)
 
 diff --git a/keystone/common/systemd.py b/keystone/common/systemd.py
-index 52d7aff..9f1cdf5 100644
+index 52d7aff..33836ab 100644
 --- a/keystone/common/systemd.py
 +++ b/keystone/common/systemd.py
 @@ -15,29 +15,70 @@
@@ -62,10 +62,10 @@ index 52d7aff..9f1cdf5 100644
  
  def notify():
 -    _sd_notify('READY=1')
-+    _sd_notify(0, 'READY=1')
++    _sd_notify(False, 'READY=1')
 +
 +def notify_once():
-+    _sd_notify(1, 'READY=1')
++    _sd_notify(True, 'READY=1')
 +
 +def onready(notify_socket, timeout):
 +    """Wait for systemd style notification on the socket.
@@ -80,16 +80,17 @@ index 52d7aff..9f1cdf5 100644
 +    """
 +    sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 +    sock.settimeout(timeout)
-+    sock.bind(notify_socket)
++    sock.bind(_abstractify(notify_socket))
 +    try:
 +        msg = sock.recv(512)
-+        if msg.find('READY=1') == -1:
-+            return 1
 +    except socket.timeout:
 +        return 2
 +    finally:
 +        sock.close()
-+    return 0
++    if 'READY=1' in msg:
++        return 0
++    else:
++        return 1
  
  
  if __name__ == '__main__':
@@ -101,6 +102,5 @@ index 52d7aff..9f1cdf5 100644
 +        timeout = float(sys.argv[1])
 +        notify_socket = os.getenv('NOTIFY_SOCKET')
 +        if notify_socket:
-+            notify_socket = _abstractify(notify_socket)
 +            retval = onready(notify_socket, timeout)
 +            sys.exit(retval)

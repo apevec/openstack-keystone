@@ -146,9 +146,8 @@ install -p -D -m 644 %{SOURCE1} %{buildroot}%{_sysconfdir}/logrotate.d/openstack
 install -p -D -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/openstack-keystone
 # Install sample data script.
 install -p -D -m 755 tools/sample_data.sh %{buildroot}%{_datadir}/keystone/sample_data.sh
-# TEMP until best place for this figured out: service readiness wrapper
+# Install service readiness wrapper
 install -p -D -m 755 %{SOURCE21} %{buildroot}%{_datadir}/keystone/daemon_notify.sh
-# TEMP END
 install -p -D -m 644 %{SOURCE3} %{buildroot}%{_datadir}/keystone/%{name}.upstart
 install -p -D -m 755 %{SOURCE5} %{buildroot}%{_bindir}/openstack-keystone-sample-data
 # Install sample HTTPD integration files
