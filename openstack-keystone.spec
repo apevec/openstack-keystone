@@ -1,18 +1,19 @@
-#
-# This is 2013.2.2 Havana stable release
-#
+
 %global release_name havana
+%global project keystone
+Source0:        http://tarballs.openstack.org/%{project}/%{project}-stable-%{release_name}.tar.gz
+%global devtag %(tar ztf %{SOURCE0} 2>/dev/null | head -1 | rev | cut -d. -f2 | rev)
+%global devrel %(tar ztf %{SOURCE0} 2>/dev/null | head -1 | rev | cut -d. -f3-5 | cut -d- -f1 | rev)
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
-Version:        2013.2.2
-Release:        1%{?dist}
+Version:        %{devrel}
+Release:        0.1.%{devtag}%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
 URL:            http://keystone.openstack.org/
-Source0:        http://launchpad.net/keystone/%{release_name}/%{version}/+download/keystone-%{version}.tar.gz
 Source1:        openstack-keystone.logrotate
 Source2:        openstack-keystone.init
 Source3:        openstack-keystone.upstart
@@ -22,7 +23,7 @@ Source21:       daemon_notify.sh
 
 
 #
-# patches_base=2013.2.2
+# patches_base=gerrit/stable/havana
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
@@ -106,8 +107,8 @@ This package contains documentation for Keystone.
 %endif
 
 %prep
-%setup -q -n keystone-%{version}
-
+%setup -q -c -T
+tar --strip-components=1 -zxf %{SOURCE0}
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
@@ -120,6 +121,7 @@ rm -rf keystone.egg-info
 
 # Remove dependency on pbr and set version as per rpm
 sed -i s/REDHATKEYSTONEVERSION/%{version}/ bin/keystone-all keystone/cli.py
+sed -i 's/^Version: .*/Version: %{version}/' PKG-INFO
 
 
 %build
