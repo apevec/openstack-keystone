@@ -1,13 +1,13 @@
 #
-# This is 2013.2.1 Havana stable release
+# This is 2013.2.2 Havana stable release
 #
 %global release_name havana
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
-Version:        2013.2.1
-Release:        2%{?dist}
+Version:        2013.2.2
+Release:        1%{?dist}
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
@@ -22,7 +22,7 @@ Source21:       daemon_notify.sh
 
 
 #
-# patches_base=2013.2.1
+# patches_base=2013.2.2
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
@@ -253,6 +253,9 @@ fi
 %endif
 
 %changelog
+* Fri Feb 14 2014 Alan Pevec <apevec@redhat.com> 2013.2.2-1
+- updated to stable havana 2013.2.2 release
+
 * Fri Jan 10 2014 Alan Pevec <apevec@redhat.com> 2013.2.1-2
 - use service readiness notification in initscript rhbz#1036515
 

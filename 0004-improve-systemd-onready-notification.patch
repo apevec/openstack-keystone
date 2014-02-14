@@ -1,4 +1,4 @@
-From 7c0bc415553c635ae4c0f0edeeca0ab76cd4f4d3 Mon Sep 17 00:00:00 2001
+From f35c4ac0d7fd87f92a350044277a061280e70e6a Mon Sep 17 00:00:00 2001
 From: Alan Pevec <apevec@redhat.com>
 Date: Wed, 8 Jan 2014 18:52:09 +0100
 Subject: [PATCH] improve systemd onready notification
@@ -11,24 +11,33 @@ to ensure service readiness is sent only once.
 * add onready() method to simulate systemd environment
 For testing purposes and optional use with SysV initscripts.
 
-Related: rhbz#1036515
+Resolves: rhbz#1058291
 
-Change-Id: I837ca8fed04780224d4cadcb535728b1b1d2adc5
+Upstream-Oslo: https://review.openstack.org/72683
+Change-Id: I80f325c9be9c171c2dc8d5526570bf64f0f87c78
 ---
- keystone/common/systemd.py | 63 ++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 52 insertions(+), 11 deletions(-)
+ keystone/common/systemd.py | 77 +++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 63 insertions(+), 14 deletions(-)
 
 diff --git a/keystone/common/systemd.py b/keystone/common/systemd.py
-index 52d7aff..33836ab 100644
+index 52d7aff..e35a1d6 100644
 --- a/keystone/common/systemd.py
 +++ b/keystone/common/systemd.py
-@@ -15,29 +15,70 @@
+@@ -1,6 +1,6 @@
+ # vim: tabstop=4 shiftwidth=4 softtabstop=4
+ 
+-# Copyright 2012 Red Hat, Inc.
++# Copyright 2012-2014 Red Hat, Inc.
+ #
+ #    Licensed under the Apache License, Version 2.0 (the "License"); you may
+ #    not use this file except in compliance with the License. You may obtain
+@@ -15,29 +15,78 @@
  #    under the License.
  
  """
 -Helper module for systemd start-up completion notification.
+-Used for "onready" configuration parameter in keystone.conf
 +Helper module for systemd service readiness notification.
- Used for "onready" configuration parameter in keystone.conf
  """
  
  import os
@@ -45,6 +54,7 @@ index 52d7aff..33836ab 100644
 +        socket_name = '\0%s' % socket_name[1:]
 +    return socket_name
 +
++
 +def _sd_notify(unset_env, msg):
 +    notify_socket = os.getenv('NOTIFY_SOCKET')
 +    if notify_socket:
@@ -53,19 +63,28 @@ index 52d7aff..33836ab 100644
 -            # abstract namespace socket
 -            sysd = '\0%s' % sysd[1:]
 -        sock.connect(sysd)
-+        sock.connect(_abstractify(notify_socket))
-         sock.sendall(msg)
-         sock.close()
--
-+        if unset_env:
-+            del os.environ['NOTIFY_SOCKET']
+-        sock.sendall(msg)
+-        sock.close()
++        try:
++            sock.connect(_abstractify(notify_socket))
++            sock.sendall(msg)
++            if unset_env:
++                del os.environ['NOTIFY_SOCKET']
++        except EnvironmentError:
++            # service notification is best effort
++            pass
++        finally:
++            sock.close()
+ 
  
  def notify():
 -    _sd_notify('READY=1')
 +    _sd_notify(False, 'READY=1')
 +
++
 +def notify_once():
 +    _sd_notify(True, 'READY=1')
++
 +
 +def onready(notify_socket, timeout):
 +    """Wait for systemd style notification on the socket.
