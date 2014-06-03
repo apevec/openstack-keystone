@@ -28,7 +28,7 @@ Source20:       keystone-dist.conf
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
-Patch0003: 0003-refactor-service-readiness-notification.patch
+Patch0003: 0003-Refactor-service-readiness-notification.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -101,10 +101,10 @@ This package contains documentation for Keystone.
 %prep
 %setup -q -c -T
 tar --strip-components=1 -zxf %{SOURCE0}
-
 %patch0001 -p1
 %patch0002 -p1
 %patch0003 -p1
+
 
 find . \( -name .gitignore -o -name .placeholder \) -delete
 find keystone -name \*.py -exec sed -i '/\/usr\/bin\/env python/d' {} \;
