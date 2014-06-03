@@ -2,17 +2,21 @@
 # This is 2014.1 Icehouse release
 #
 %global release_name icehouse
+%global project keystone
+Source0:        http://tarballs.openstack.org/%{project}/%{project}-stable-%{release_name}.tar.gz
+%global devtag %(tar ztf %{SOURCE0} 2>/dev/null | head -1 | rev | cut -d. -f2 | rev)
+%global devver %(tar ztf %{SOURCE0} 2>/dev/null | head -1 | rev | cut -d. -f3-5 | cut -d- -f1 | rev)
 
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:           openstack-keystone
-Version:        2014.1
-Release:        2%{?dist}
+Version:        %{devver}
+Release:        0.1.%{devtag}%{?dist}
+
 Summary:        OpenStack Identity Service
 
 License:        ASL 2.0
 URL:            http://keystone.openstack.org/
-Source0:        http://launchpad.net/keystone/%{release_name}/%{version}/+download/keystone-%{version}.tar.gz
 Source1:        openstack-keystone.logrotate
 Source2:        openstack-keystone.service
 Source5:        openstack-keystone-sample-data
@@ -20,7 +24,7 @@ Source20:       keystone-dist.conf
 
 
 #
-# patches_base=2014.1
+# patches_base=gerrit/stable/icehouse
 #
 Patch0001: 0001-remove-runtime-dep-on-python-pbr.patch
 Patch0002: 0002-sync-parameter-values-with-keystone-dist.conf.patch
@@ -95,7 +99,8 @@ This package contains documentation for Keystone.
 %endif
 
 %prep
-%setup -q -n keystone-%{version}
+%setup -q -c -T
+tar --strip-components=1 -zxf %{SOURCE0}
 
 %patch0001 -p1
 %patch0002 -p1
@@ -108,6 +113,7 @@ rm -rf keystone.egg-info
 
 # Remove dependency on pbr and set version as per rpm
 sed -i s/REDHATKEYSTONEVERSION/%{version}/ bin/keystone-all keystone/cli.py
+sed -i 's/^Version: .*/Version: %{version}/' PKG-INFO
 
 # make doc build compatible with python-oslo-sphinx RPM
 sed -i 's/oslosphinx/oslo.sphinx/' doc/source/conf.py
